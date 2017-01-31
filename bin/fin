@@ -13,12 +13,14 @@ NC='\033[0m'
 DOCKSAL_VERSION="${DOCKSAL_VERSION:-master}"
 
 #---------------------------- Global Constants --------------------------------
-REQUIREMENTS_DOCKER='1.12.6'
-REQUIREMENTS_DOCKER_COMPOSE='1.9.0'
-REQUIREMENTS_DOCKER_MACHINE='0.8.2'
-REQUIREMENTS_VBOX='5.1.12'
-REQUIREMENTS_WINPTY='0.4.0'
-REQUIREMENTS_WINPTY_CYGWIN='2.5.2'
+# We set the version requirements firm here to avoid potential compatibility issues, when Docker pushes a new release out.
+# Users can override these via env variables, if they know what they are doing.
+DOCKSAL_REQUIREMENTS_DOCKER=${DOCKSAL_REQUIREMENTS_DOCKER:-'1.12.6'}
+DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE=${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE:-'1.9.0'}
+DOCKSAL_REQUIREMENTS_DOCKER_MACHINE=${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE:-'0.8.2'}
+DOCKSAL_REQUIREMENTS_VBOX=${DOCKSAL_REQUIREMENTS_VBOX:-'5.1.12'}
+DOCKSAL_REQUIREMENTS_WINPTY=${DOCKSAL_REQUIREMENTS_WINPTY:-'0.4.0'}
+DOCKSAL_REQUIREMENTS_WINPTY_CYGWIN=${DOCKSAL_REQUIREMENTS_WINPTY_CYGWIN:-'2.5.2'}
 
 # Self Paths
 FIN_PATH="/usr/local/bin/fin"
@@ -89,18 +91,18 @@ URL_STACKS_VOLUMES_BIND="${URL_REPO}/${DOCKSAL_VERSION}/stacks/volumes-bind.yml"
 URL_STACKS_VOLUMES_NFS="${URL_REPO}/${DOCKSAL_VERSION}/stacks/volumes-nfs.yml"
 URL_STACKS_VOLUMES_UNISON="${URL_REPO}/${DOCKSAL_VERSION}/stacks/volumes-unison.yml"
 
-URL_DOCKER_MAC="https://get.docker.com/builds/Darwin/x86_64/docker-${REQUIREMENTS_DOCKER}.tgz"
+URL_DOCKER_MAC="https://get.docker.com/builds/Darwin/x86_64/docker-${DOCKSAL_REQUIREMENTS_DOCKER}.tgz"
 URL_DOCKER_NIX="https://get.docker.com/"
-URL_DOCKER_WIN="https://get.docker.com/builds/Windows/x86_64/docker-${REQUIREMENTS_DOCKER}.zip"
-URL_DOCKER_COMPOSE_MAC="https://github.com/docker/compose/releases/download/${REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Darwin-x86_64"
-URL_DOCKER_COMPOSE_NIX="https://github.com/docker/compose/releases/download/${REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Linux-x86_64"
-URL_DOCKER_COMPOSE_WIN="https://github.com/docker/compose/releases/download/${REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Windows-x86_64.exe"
-URL_DOCKER_MACHINE_MAC="https://github.com/docker/machine/releases/download/v${REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Darwin-x86_64"
-URL_DOCKER_MACHINE_NIX="https://github.com/docker/machine/releases/download/v${REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Linux-x86_64"
-URL_DOCKER_MACHINE_WIN="https://github.com/docker/machine/releases/download/v${REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Windows-x86_64.exe"
-URL_BOOT2DOCKER="https://github.com/boot2docker/boot2docker/releases/download/v${REQUIREMENTS_DOCKER}/boot2docker.iso"
+URL_DOCKER_WIN="https://get.docker.com/builds/Windows/x86_64/docker-${DOCKSAL_REQUIREMENTS_DOCKER}.zip"
+URL_DOCKER_COMPOSE_MAC="https://github.com/docker/compose/releases/download/${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Darwin-x86_64"
+URL_DOCKER_COMPOSE_NIX="https://github.com/docker/compose/releases/download/${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Linux-x86_64"
+URL_DOCKER_COMPOSE_WIN="https://github.com/docker/compose/releases/download/${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE}/docker-compose-Windows-x86_64.exe"
+URL_DOCKER_MACHINE_MAC="https://github.com/docker/machine/releases/download/v${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Darwin-x86_64"
+URL_DOCKER_MACHINE_NIX="https://github.com/docker/machine/releases/download/v${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Linux-x86_64"
+URL_DOCKER_MACHINE_WIN="https://github.com/docker/machine/releases/download/v${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE}/docker-machine-Windows-x86_64.exe"
+URL_BOOT2DOCKER="https://github.com/boot2docker/boot2docker/releases/download/v${DOCKSAL_REQUIREMENTS_DOCKER}/boot2docker.iso"
 
-URL_WINPTY="https://github.com/rprichard/winpty/releases/download/${REQUIREMENTS_WINPTY}/winpty-${REQUIREMENTS_WINPTY}-cygwin-${REQUIREMENTS_WINPTY_CYGWIN}-ia32.tar.gz"
+URL_WINPTY="https://github.com/rprichard/winpty/releases/download/${DOCKSAL_REQUIREMENTS_WINPTY}/winpty-${DOCKSAL_REQUIREMENTS_WINPTY}-cygwin-${DOCKSAL_REQUIREMENTS_WINPTY_CYGWIN}-ia32.tar.gz"
 
 IMAGE_SSH_AGENT=${IMAGE_SSH_AGENT:-docksal/ssh-agent:1.0}
 IMAGE_VHOST_PROXY=${IMAGE_VHOST_PROXY:-docksal/vhost-proxy:1.0}
@@ -502,12 +504,12 @@ check_docker_running ()
 	check_binary_found 'docker'
 	check_binary_found 'docker-compose'
 	if ! is_docker_native && ! is_docker_version; then
-		echo-error "Required Docker version is $REQUIREMENTS_DOCKER"
+		echo-error "Required Docker version is $DOCKSAL_REQUIREMENTS_DOCKER"
 		echo -e "Run ${yellow}fin update${NC} to update"
 		exit 1
 	fi
 	if is_docker_native && ! is_docker_version; then
-		echo-yellow "Your Docker version is out of date. Please update to $REQUIREMENTS_DOCKER"
+		echo-yellow "Your Docker version is out of date. Please update to $DOCKSAL_REQUIREMENTS_DOCKER"
 	fi
 
 	is_docker_running
@@ -554,7 +556,7 @@ is_vbox_version ()
 	! which "$vboxmanage" >/dev/null 2>&1 && return 1
 
 	local virtualbox_version=$("$vboxmanage" -v | sed "s/r.*//" 2>/dev/null)
-	[[ $(ver_to_int "$virtualbox_version") < $(ver_to_int "$REQUIREMENTS_VBOX") ]] && \
+	[[ $(ver_to_int "$virtualbox_version") < $(ver_to_int "$DOCKSAL_REQUIREMENTS_VBOX") ]] && \
 		return 1
 
 	return 0
@@ -566,7 +568,7 @@ is_docker_version ()
 
 	local version=$(docker -v | sed "s/.*version \(.*\),.*/\1/")
 
-	[[ $(ver_to_int "$REQUIREMENTS_DOCKER") -ne $(ver_to_int "$version") ]] && \
+	[[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER") -ne $(ver_to_int "$version") ]] && \
 		return 1;
 
 	return 0;
@@ -578,7 +580,7 @@ is_docker_server_version ()
 
 	local version=$(docker version --format '{{.Server.Version}}' 2>/dev/null)
 
-	[[ $(ver_to_int "$REQUIREMENTS_DOCKER") -ne $(ver_to_int "$version") ]] && \
+	[[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER") -ne $(ver_to_int "$version") ]] && \
 		return 1;
 
 	return 0;
@@ -590,7 +592,7 @@ is_docker_compose_version ()
 
 	# Trim any control characters from docker-compose output (necessary on Windows)
 	local version=$(docker-compose version --short | tr -d '[:cntrl:]')
-	[[ $(ver_to_int "$REQUIREMENTS_DOCKER_COMPOSE") > $(ver_to_int "$version") ]] && \
+	[[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE") > $(ver_to_int "$version") ]] && \
 		return 1;
 
 	return 0;
@@ -601,7 +603,7 @@ is_docker_machine_version ()
 	! which docker-machine >/dev/null 2>&1 && return 1
 
 	local version=$(docker-machine -v | sed "s/.*version \(.*\),.*/\1/")
-	[[ $(ver_to_int "$REQUIREMENTS_DOCKER_MACHINE") > $(ver_to_int "$version") ]] && \
+	[[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER_MACHINE") > $(ver_to_int "$version") ]] && \
 		return 1;
 
 	return 0;
@@ -612,7 +614,7 @@ is_winpty_version ()
 	! which "$WINPTY_BIN" >/dev/null 2>&1 && return 2
 
 	local version=$("$WINPTY_BIN" --version | head -1 | sed "s/.*version \(.*\).*/\1/")
-	[[ $(ver_to_int "$REQUIREMENTS_WINPTY") > $(ver_to_int "$version") ]] && \
+	[[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_WINPTY") > $(ver_to_int "$version") ]] && \
 		return 1;
 
 	return 0;
@@ -623,7 +625,7 @@ check_vbox_version ()
 	is_vbox_version
 	local res=$?
 	[[ "$res" == "1" ]] && echo-error "$vboxmanage binary was not found" && exit 1
-	[[ "$res" == "2" ]] && echo-error "VirtualBox version should be $REQUIREMENTS_VBOX or higher" && exit 1
+	[[ "$res" == "2" ]] && echo-error "VirtualBox version should be $DOCKSAL_REQUIREMENTS_VBOX or higher" && exit 1
 }
 
 # Check that .docksal is present
@@ -2010,7 +2012,7 @@ install_tools_mac ()
 			echo-error "$vboxmanage executable was not found. VirtualBox is required to run Docksal on Mac." \
 				&& exit 1
 		elif ! is_vbox_version; then
-			echo-error "Required VirtualBox version is $REQUIREMENTS_VBOX or higher" \
+			echo-error "Required VirtualBox version is $DOCKSAL_REQUIREMENTS_VBOX or higher" \
 				&& exit 1
 		fi
 	fi
@@ -2020,7 +2022,7 @@ install_tools_mac ()
 
 	# Install Docker client
 	if ! is_docker_version; then
-		echo-green "Installing docker client v${REQUIREMENTS_DOCKER}..."
+		echo-green "Installing docker client v${DOCKSAL_REQUIREMENTS_DOCKER}..."
 		(cd "$CONFIG_DOWNLOADS_DIR" && \
 			curl -sSL "$URL_DOCKER_MAC" | tar zxf - && \
 			mv "docker/docker" "$CONFIG_BIN_DIR/")
@@ -2029,7 +2031,7 @@ install_tools_mac ()
 
 	# Install docker-compose
 	if ! is_docker_compose_version; then
-		echo-green "Installing docker-compose v${REQUIREMENTS_DOCKER_COMPOSE}..."
+		echo-green "Installing docker-compose v${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE}..."
 		curl -sSL "$URL_DOCKER_COMPOSE_MAC" -o "$DOCKER_COMPOSE_BIN" && \
 			chmod +x "$DOCKER_COMPOSE_BIN"
 		if_failed "Check file permissions and internet connection."
@@ -2037,7 +2039,7 @@ install_tools_mac ()
 
 	# Install docker-machine
 	if ! is_docker_machine_version; then
-		echo-green "Installing docker-machine v${REQUIREMENTS_DOCKER_MACHINE}..."
+		echo-green "Installing docker-machine v${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE}..."
 		curl -sSL "$URL_DOCKER_MACHINE_MAC" -o "$DOCKER_MACHINE_BIN" && \
 			chmod +x "$DOCKER_MACHINE_BIN"
 		if_failed "Check file permissions and internet connection."
@@ -2051,13 +2053,13 @@ install_tools_mac ()
 		is_docker_machine_running && \
 		echo-green "Preparing to update virtual machine..." && \
 		docker_machine_stop && \
-		echo "Downloading boot2docker.iso v${REQUIREMENTS_DOCKER}" && \
+		echo "Downloading boot2docker.iso v${DOCKSAL_REQUIREMENTS_DOCKER}" && \
 		curl -ksSL "$URL_BOOT2DOCKER" -o "$HOME/.docker/machine/machines/$DOCKER_MACHINE_NAME/boot2docker.iso" && \
 		docker_machine_start
 
 	if is_docker_native && [[ ${UPGRADE_IN_PROGRESS} == 1 ]]; then
 		local server_version=$(docker version --format '{{.Server.Version}}')
-		if [[ $(ver_to_int "$REQUIREMENTS_DOCKER") > $(ver_to_int "$server_version") ]]; then
+		if [[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER") > $(ver_to_int "$server_version") ]]; then
 			echo-yellow "[IMPORTANT]: update Docker for Mac to the latest version manually"
 			sleep 2
 		fi
@@ -2072,14 +2074,14 @@ install_tools_windows ()
 	if ! is_docker_native; then
 		# Check VirtualBox
 		if ! is_vbox_version; then
-			echo-error "Required VirtualBox version is $REQUIREMENTS_VBOX or higher" \
+			echo-error "Required VirtualBox version is $DOCKSAL_REQUIREMENTS_VBOX or higher" \
 				&& exit 1
 		fi
 	fi
 
 	# Install Docker client
 	if ! is_docker_version; then
-		echo-green "Installing docker client v${REQUIREMENTS_DOCKER}..."
+		echo-green "Installing docker client v${DOCKSAL_REQUIREMENTS_DOCKER}..."
 		(cd "$CONFIG_DOWNLOADS_DIR" && \
 			curl -sSL "$URL_DOCKER_WIN" -o docker.zip && \
 			unzip docker.zip && \
@@ -2091,7 +2093,7 @@ install_tools_windows ()
 
 		# Install Docker Compose
 	if ! is_docker_compose_version; then
-		echo-green "Installing docker-compose v${REQUIREMENTS_DOCKER_COMPOSE}..."
+		echo-green "Installing docker-compose v${DOCKSAL_REQUIREMENTS_DOCKER_COMPOSE}..."
 		curl -sSL "$URL_DOCKER_COMPOSE_WIN" -o "$DOCKER_COMPOSE_BIN.exe" && \
 			chmod +x "$DOCKER_COMPOSE_BIN.exe"
 		if_failed "Check file permissions and internet connection."
@@ -2099,7 +2101,7 @@ install_tools_windows ()
 
 		# Install Docker Machine
 	if ! is_docker_machine_version; then
-		echo-green "Installing docker-machine v${REQUIREMENTS_DOCKER_MACHINE}..."
+		echo-green "Installing docker-machine v${DOCKSAL_REQUIREMENTS_DOCKER_MACHINE}..."
 		curl -ksSL "$URL_DOCKER_MACHINE_WIN" -o "$DOCKER_MACHINE_BIN.exe" && \
 			chmod +x "$DOCKER_MACHINE_BIN.exe"
 		if_failed "Check file permissions and internet connection."
@@ -2107,7 +2109,7 @@ install_tools_windows ()
 
 	# Install winpty
 	if ! is_winpty_version; then
-		echo-green "Installing winpty v${REQUIREMENTS_WINPTY}..."
+		echo-green "Installing winpty v${DOCKSAL_REQUIREMENTS_WINPTY}..."
 		(cd "$CONFIG_DOWNLOADS_DIR" && \
 			curl -sSL "$URL_WINPTY" | tar -xzf - && \
 			mv winpty-*/bin/* "$CONFIG_BIN_DIR/")
@@ -2134,14 +2136,14 @@ install_tools_windows ()
 		is_docker_machine_running && \
 		echo-green "Preparing to update virtual machine..." && \
 		docker_machine_stop && \
-		echo "Downloading boot2docker.iso v${REQUIREMENTS_DOCKER}" && \
+		echo "Downloading boot2docker.iso v${DOCKSAL_REQUIREMENTS_DOCKER}" && \
 		curl -ksSL "$URL_BOOT2DOCKER" -o "$(cygpath $USERPROFILE)/.docker/machine/machines/$DOCKER_MACHINE_NAME/boot2docker.iso" && \
 		docker_machine_start
 	fi
 
 	if is_docker_native && [[ ${UPGRADE_IN_PROGRESS} == 1 ]]; then
 		local server_version=$(docker version --format '{{.Server.Version}}')
-		if [[ $(ver_to_int "$REQUIREMENTS_DOCKER") > $(ver_to_int "$server_version") ]]; then
+		if [[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER") > $(ver_to_int "$server_version") ]]; then
 			echo-green-bg " [IMPORTANT]: update Docker for Windows to the latest version manually "
 			sleep 2
 		fi
@@ -2169,7 +2171,7 @@ install_tools_ubuntu ()
 		fi
 
 		# Pin docker-engine version to avoid apt-get upgrade.
-		echo -e "Package: docker-engine\nPin: version ${REQUIREMENTS_DOCKER}*\nPin-Priority: 1001" | sudo tee "/etc/apt/preferences.d/docksal.pref" >/dev/null || exit 1
+		echo -e "Package: docker-engine\nPin: version ${DOCKSAL_REQUIREMENTS_DOCKER}*\nPin-Priority: 1001" | sudo tee "/etc/apt/preferences.d/docksal.pref" >/dev/null || exit 1
 
 		curl -sSL "${URL_DOCKER_NIX}" | \
 			# patch Docker installation script on the fly to install a specific Docker version
@@ -2382,7 +2384,7 @@ update ()
 	# Pre-update check #2: warn if boot2docker will need to be upgraded
 	if (is_mac || is_windows) && ! is_docker_native && [[ ${UPGRADE_IN_PROGRESS} == 1 ]]; then
 		local b2d_version=$(docker version --format '{{.Server.Version}}')
-		if [[ $(ver_to_int "$REQUIREMENTS_DOCKER") > $(ver_to_int "$b2d_version") ]]; then
+		if [[ $(ver_to_int "$DOCKSAL_REQUIREMENTS_DOCKER") > $(ver_to_int "$b2d_version") ]]; then
 			BOOT2DOCKER_NEEDS_AN_UPGRADE=1
 			(${FULL_UPDATE}) &&
 				_confirm "All running projects will be stopped for vm upgrade. Continue?"
