@@ -51,12 +51,8 @@ teardown() {
 	[[ $SKIP == 1 ]] && skip
 
 	run fin init
-	echo "$output" | grep "Initializing local project configuration"
-	echo "$output" | grep "Recreating services"
-	echo "$output" | grep "Installing site"
-	echo "$output" | grep "Congratulations, you installed Drupal!"
 
-	# Check if site is available and it's name is correct
+	# Check if site is available and its name is correct
 	run curl -sL http://drupal8.docksal
 	echo "$output" | grep "My Drupal 8 Site"
 }
@@ -100,7 +96,7 @@ teardown() {
 
 	# Import mysql dump
     run fin mysql-import dump.sql --force
-    echo "$output" | grep "Truncating 'default'"
+    echo "$output" | grep "Truncating"
     echo "$output" | grep "Importing"
 
 	# Check that the site is available
@@ -113,7 +109,7 @@ teardown() {
 
 	# Import mysql dump
 	run fin mysql-import dump.sql --db-user="user" --db-password="user" --force
-    echo "$output" | grep "Truncating 'default'"
+    echo "$output" | grep "Truncating"
     echo "$output" | grep "Importing"
 
 	# Check that the site is available
@@ -125,8 +121,8 @@ teardown() {
 	[[ $SKIP == 1 ]] && skip
 
 	# Import mysql dump
-	run fin mysql-import dump.sql --db-user="wront-user" --db-password="wrong-password" --force
-    echo "$output" | grep "Truncating 'default'"
+	run fin mysql-import dump.sql --db-user="wrong-user" --db-password="wrong-password" --force
+    echo "$output" | grep "Truncating"
     echo "$output" | grep "Importing"
     echo "$output" | grep "Import failed"
 }
@@ -136,7 +132,7 @@ teardown() {
 
 	# Import mysql dump
 	run fin mysql-import dump.sql --db-user="user" --db-password="user" --db="nondefault" --force
-	echo "$output" | grep "Truncating 'nondefault'"
+	echo "$output" | grep "Truncating" | grep "nondefault"
 	echo "$output" | grep "Importing"
 	echo "$output" | grep "Import failed"
 }
